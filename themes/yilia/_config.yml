@@ -1,0 +1,66 @@
+# Header
+menu:
+  主页: /
+  iOS相关: /categories/iOS/
+  随笔: /categories/essay
+  所有文章: /archives
+  # 随笔: /tags/随笔
+
+# SubNav
+subnav:
+  github: "https://github.com/sadjason"
+  weibo: "http://weibo.com/sadjason"
+  mail: "mailto:sadjason@qq.com"
+  rss: "/atom.xml"
+  #rss: "#"
+  #zhihu: "#"
+  #douban: "#"
+  #mail: "#"
+  #facebook: "#"
+  #google: "#"
+  #twitter: "#"
+  #linkedin: "#"
+
+rss: /atom.xml
+
+# Content
+excerpt_link: more
+fancybox: true
+mathjax: true
+
+# 是否开启动画效果
+animate: true
+
+# 是否在新窗口打开链接
+open_in_new: false
+
+# Miscellaneous
+google_analytics: ''
+favicon: /favicon.png
+
+#你的头像url
+avatar: /avatar.png
+#是否开启分享
+share_jia: false
+# share_addthis: false
+#是否开启多说评论，填写你在多说申请的项目名称 duoshuo: duoshuo-key
+#若使用disqus，请在博客config文件中填写disqus_shortname，并关闭多说评论
+duoshuo: false
+# duoshuo_short_name: sadjason
+#是否开启云标签
+tagcloud: true
+
+
+#是否开启友情链接
+#不开启——
+#friends: false
+#开启——
+friends:
+  张不坏的博客: https://sadjason.github.io
+  习大大的博客: https://sadjason.github.io
+
+#是否开启“关于我”。
+#不开启——
+#aboutme: false
+#开启——
+aboutme: 男，92年生人，自09年起混迹于中南大学7年，所学专业是EE，后因缘际会转入CS，不学无术，现于美团从事iOS开发工作。
