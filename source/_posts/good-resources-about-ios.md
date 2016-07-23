@@ -24,6 +24,10 @@ tags: Resources
 
 处理Objective-C警告时可能会用到。
 
+* [How Do I Declare A Block in Objective-C?](http://fuckingblocksyntax.com/)
+
+忘记了block语法怎么办？这个网站会告诉你！
+
 ## 好控件（增强、个性、炫酷）
 
 * [DGRunkeeperSwitch](https://github.com/gontovnik/DGRunkeeperSwitch)
