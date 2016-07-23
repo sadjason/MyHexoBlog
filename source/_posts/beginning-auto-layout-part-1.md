@@ -9,14 +9,14 @@ categories: iOS
 
 iOS的的布局机制「auto layout」不是一个新概念，它早在iOS 6中就推出来了，当下距离iOS 9正式版面世已不远矣，我却对它的了解还比较初级。
 
-我之前对「auto layout」机制的理解非常粗浅，几乎把它和「constraint」对等。对它的使用有这么几个阶段：
+我之前对auto layout机制的理解非常粗浅，几乎把它和「constraint」对等。对它的使用有这么几个阶段：
 1. Storyboard中通过拖拽设置constraints；
 2. 学习VFL（Visual Format Language）语法使用代码设置constraints；
 3. 使用大杀器[Masonry](https://github.com/SnapKit/Masonry)。
 
 >P.S: iOS的VFL语法实在太罗嗦了，又臭又长且可读性差难于调试，无法忍受，Masonry正是解决这一痛点的第三方库，非常好用，学习成本非常低。
 
-近期因为项目，我需要实现一个能够自适应文本自动调整高度的table view cell。网上有相关丰富的资源（category、博客等），思路都非常简单，比如这篇：[动态计算UITableViewCell高度详解](http://www.cocoachina.com/industry/20140604/8668.html)。但即便如此，我对有些东西理解起来还有障碍，譬如`systemLayoutSizeFittingSize:`和`sizeThatFits:`之类的，想到我都将近有一年的开发经验了，居然还无法「理解」这么简单的东西，不能忍！
+近期因为项目，我需要实现一个能够自适应文本自动调整高度的table view cell。网上有相关丰富的资源（category、博客等），思路都非常简单，比如这篇：[动态计算UITableViewCell高度详解](http://www.cocoachina.com/industry/20140604/8668.html)。但即便如此，我对有些东西理解起来还有障碍，譬如`systemLayoutSizeFittingSize:`和`sizeThatFits:`之类的，想到我都将近有大半年的开发经验了，居然还无法理解这么简单的东西，不能忍！
 
 导致这种结果的主要原因有俩：一是之前项目比较简单，涉及auto layout相关的知识无非是add/update/remove constraints；二是自己太轻浮，把auto layout想得太简单；
 

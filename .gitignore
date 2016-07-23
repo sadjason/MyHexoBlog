@@ -2,3 +2,5 @@ db.json
 .DS_Store
 public/*
 public
+.deploy_git
+.deploy_git/*
