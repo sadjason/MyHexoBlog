@@ -1,4 +1,4 @@
-title: Git基础知识
+title: Git基础
 date: 2015-12-05 11:04:04
 tags:
 - Git
@@ -80,7 +80,7 @@ Git目录里除了index文件（暂存区）之外，还有Git为我们自动创
 
 ## Git基础
 
-这一部分将介绍几个最基本的，也是最常用的的Git命令，以后绝大多数时间里用到的也就是这几个命令。
+这一部分将介绍几个最基本的，也是最常用的的Git命令；相对比较复杂的分支管理和远程操作，会在后续的博客中补充。
 
 ### 取得项目的Git仓库
 
@@ -110,7 +110,6 @@ $ git clone -n git://github.com/sadjasonsadjason.github.io.git
 * 从本地克隆。格式为`git clone /path/to/repo`；还有一种更简单的方法，`Ctrl+C`->`Ctrl+V`或者`Cmd+C`->`Cmd+V`，也是醉了😂
 
 >P.S: 还可以设置`git clone`的选项，只克隆某个指定的分支，本文暂时不讨论分支相关问题，以后再说吧。
-
 
 **在工作目录中初始化新仓库 -- git init**
 
@@ -152,7 +151,7 @@ nothing to commit, working directory clean
 
 这说明现在的工作区相当干净。换句话说，所有已跟踪文件在上次提交后都未被更改过。此外，上面的信息还表明，当前目录下没有出现任何处于未跟踪的新文件，否则Git会在这里列出来。该命令还显示了当前所在的分支是`master`。
 
-现在在当前目录(A-Simple-C-Project/）下创建一个新文件main.c，再次使用`git status`会看到该文件会出现在未跟踪文件列表中，这一次加上`-s`选项,如下：
+现在在当前目录(~/A-Simple-C-Project/）下创建一个新文件main.c，再次使用`git status`会看到该文件会出现在未跟踪文件列表中，这一次加上`-s`选项,如下：
 
 ```sh
 $ touch main.c
@@ -162,7 +161,7 @@ $ git status -s
 
 加上`-s`的状态报告要简洁得多，其中`??`标记表示该文件是未跟踪文件。
 
->P.S: `git status -s`的状态报告中有几种可能的标记：
+>P.S: `git status -s`的状态报告中有几种可能的状态符：
 * `??`：表示未跟踪；
 * `A`：表示新添加到暂存区，但还没提交；
 * `M_`（`M`在左侧）：表示已修改且添加（`git add`）到暂存区中，但还没提交（`git commit`)；
@@ -203,13 +202,13 @@ $ cat .gitignore
 *~
 ```
 
-第一行告诉Git忽略所有已`.o`或`.a`结尾的文件，一般这类对象文件和存档文件都是编译过程中出现的，用不着跟踪它们的版本信息；第二行告诉Git忽略所有已波浪符（`~`）结尾的文件，许多文本编译软件（比如Emacs）都用这样的文件名保存副本。此外，还可能需要忽略`log`、`tmp`或者`pid`目录，以及自动生成的文档等等。
+第一行告诉Git忽略所有已`.o`或`.a`结尾的文件，一般这类对象文件和存档文件都是编译过程中出现的，用不着跟踪它们的版本信息；第二行告诉Git忽略所有以波浪符（`~`）结尾的文件，许多文本编译软件（比如Emacs）都用这样的文件名保存副本。此外，还可能需要忽略`log`、`tmp`或者`pid`目录，以及自动生成的文档等等。
 
 要养成一开始就设置好`.gitignore`文件的习惯，以免将来误提交这类无用的文件。
 
 `.gitignore`的规格规范如下：
 
-* 所有空行或者以注释`#`开头的行都会被Git忽略
+* 所有空行或者以注释（`#`）开头的行都会被Git忽略
 * 可以使用标准的glob模式匹配
 * 匹配模式最后跟反斜杠（`/`）说明要忽略的是目录
 * 要忽略指定模式以外的文件或目录，可以在模式前加上惊叹号（`!`）取反
@@ -269,7 +268,7 @@ P.S: `--staged`选项和`--cached`作用相同，且表达意思更准确一些�
 
 **提交更新 -- git commit**
 
-如果所有文件新增、文件修改都放入了暂存区，那么意味着已经准备妥当，可以提交以记录成版本了。如果不确定，可以使用`git status`或者`git diff`查看一下。提交操作命令是`git commit`，常用的格式是`git commit m "some commit messages"`。
+如果所有文件新增、文件修改都放入了暂存区，那么意味着已经准备妥当，可以提交以记录成版本了。如果不确定，可以使用`git status`或者`git diff`查看一下。提交操作命令是`git commit`，常用的格式是`git commit -m "some commit messages"`。
 
 正常情况下，修改一个文件的流程是：在工作区修改->`git add ...`->`git commit ...`。有时候会觉得`git add`太麻烦了，就可以直接跳过使用暂时区，help文档描述如下：
 >By using the `-a` switch with the commit command to automatically "add" changes from all known files (i.e. all files that are already listed in the index) and to automatically "rm" files in the index that have been removed from the working tree, and then perform the actual commit.
@@ -280,23 +279,23 @@ P.S: `--staged`选项和`--cached`作用相同，且表达意思更准确一些�
 
 如果只是简单的从工作区中手工删除文件，运行`git status`时会看到「Changes not staged for commit」信息，此时还得补上`git add`命令才行。
 
-还有一种常见情况是，我们想把文件从Git仓库中删除（亦即从暂存区中移除），但仍然希望保留在当前工作区中。换句话说，想让文件保存在磁盘，但并不想让Git继续跟踪该文件。当忘记添加`.gitignore`文件，不消息把一个很大的日志文件或一堆`.a`这样的编译生成文件添加到暂存区时，这一做法尤其有用，为达到这一目的，需要加上`--cached`选项。
+还有一种常见情况是，我们想把文件从Git仓库中删除（亦即从暂存区中移除），但仍然希望保留在当前工作区中。换句话说，想让文件保存在磁盘，但并不想让Git继续跟踪该文件。当忘记添加`.gitignore`文件，不小心把一个很大的日志文件或一堆`.a`这样的编译生成文件添加到暂存区时，这一做法尤其有用，为达到这一目的，需要加上`--cached`选项。
 
 **移动文件 -- git mv**
 
-不像其他VCS系统，Git并不显式跟踪文件移动操作（包括重命名）。可使用`git mv`命令处理文件移动处理，简单来说，运行`git mv file_from file_to`相当于运行了下面三条命令：
+不像其他VCS，Git并不显式跟踪文件移动操作（包括重命名）。可使用`git mv`命令处理文件移动处理，简单来说，运行`git mv file_from file_to`相当于运行了下面三条命令：
 
 ```sh
-mv file_from file_to
-git rm file_from
-git add file_to
+$ mv file_from file_to
+$ git rm file_from
+$ git add file_to
 ```
 
 ### 查看提交历史
 
 在提交了若干更新，又或者克隆了某个项目之后，也许想回顾下提交历史. 完成这个任务最简单而又有效的工具是`git log`命令。
 
-注意，`git log`命令并不是查看所有git操作记录，而只是`git commit`的记录。
+注意，`git log`命令并不是查看所有git操作记录，而只是查看`git commit`的记录。
 
 默认不用任何参数的话，`git log`会按提交时间列出所有的commits，最近的更新排在最上面，如下：
 
@@ -333,10 +332,11 @@ Date:   Sun Jul 10 13:40:59 2016 +0800
 
 关于更多`git log`的选项配置，参考[Viewing the Commit History](https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History)。
 
+### 撤销与版本回退
 
-### 撤销操作
+在任何一个阶段，都有可能想要撤销某些操作。这里，将学习几个撤销所作修改的基本工具。除了撤销，这一部分还介绍版本回退。
 
-在任何一个阶段，都有可能想要撤销某些操作。这里，将学习几个撤销所做修改的基本工具。值得一提的是，有些撤销操作是不可逆的。
+值得一提的是，有些撤销操作是不可逆的。
 
 **撤销最后一次提交**
 
@@ -398,7 +398,7 @@ Untracked files:
 
 ```
 
-`git reset`命令的使用比较复杂，后面再谈。
+P.S: `git reset HEAD`命令会撤销所有暂存。
 
 **撤销对文件的修改 -- git checkout**
 
@@ -420,7 +420,7 @@ no changes added to commit (use "git add" and/or "git commit -a")
 「use "git checkout -- <file>..." to discard changes in working directory」提示告诉了我们该怎么干，照做就是：
 
 ```sh
-$ git checkout -- main.c 
+$ git checkout -- main.c  # 注意`--`和`main.c`之间得用空格隔开
 $ git status
 On branch master
 nothing to commit, working directory clean
@@ -428,99 +428,110 @@ nothing to commit, working directory clean
 
 值得注意的是，`git checkout -- <file>`是一个危险的命令。对文件做的任何修改都会消失 -- 它只是拷贝了另一个文件来覆盖它。因此，除非确实清楚不想要那个文件了，否则不要使用这个命令。此外，该命令能执行成功的前提是仓库中已有该文件。
 
-### 远程仓库的使用
+~~P.S: 如果修改了某个文件，并且把它提交到暂存区，但现在想放弃该文件的所有修改，该如何处理呢？也简单，先`git reset HEAD <file>`，然后再`git checkout -- <file>`即可。~~
 
-为了能在任意Git项目上协作，需要知道如何管理自己的远程仓库。远程仓库是指托管在因特网或其他网络中的项目的版本库。你可以有好几个远程仓库，通常有些仓库对你只读，有些则可以读写。与他人协作涉及管理远程仓库以及根据需要推送或拉取数据。
+补充说明：`git checkout -- <file>`的意思是把`<file>`文件在工作区的修改全部撤销，这里有两种情况：一种是`<file>`自修改后还没有被放到暂存区，该命令作用后，`<file>`回到和版本库一模一样的状态；另一种是`<file>`已经被添加到暂存区，且之后又作了修改，即该命令对应的状态符是`MM`，该命令作用后，`<file>`回到添加到暂存区后的状态。
 
-除了上文提到的`git clone`，还有4个命令与远程仓库息息相关：`git remote`、`git fetch`、`git pull`、`git push`。有一张非常常见且直观的图对这些命令的功能进行了描述，如下：
+P.S: `git reset --hard HEAD`命令也能使得工作区的所有文件状态恢复到与当前版本库一致。
 
-<div class="imagediv" style="width: 400px; height: 113px">{% asset_img git-remote@2x.jpg %}</div>
+**版本回退 -- git reset**
 
-**远程仓库的查看、添加、移除以及重命名 -- git remote**
+很多时候遇到这样抓狂的事情：在某个节点之后修改工程，做了一番修改后，工程无法再次通过编译，或者无法达到想要的目的，寻找问题却始终不得结果，无奈之下，只能回到最后一次正常的节点推倒重来。如果项目使用Git进行管理，那么「回到最后一次正常的节点」应该就是常说的版本回退。
 
-为了便于管理，Git要求每个远程主机都有一个主机名，简单来说，`git remote`命令就是用于管理Git远程主机名的。
+版本回退的意义应该不用赘述了。如何处理呢？首先确定工具（命令），`git reset`是也！
 
-不带选项的时候，`git remote`命令列出所有远程主机：
+下面阐述版本回退的内容比较长...
+
+这里先简要介绍两个概念：commit-id和`HEAD`指针。每个版本（每次commit）都有一个id，这个id是Git自动生成的，即所谓的commit-id；`HEAD`指针的概念相对复杂一些，它与分支也有关系，当前还没有涉及到分支，目前所需要知道的是：在Git中，使用`HEAD`表示当前版本，`HEAD^`表示上一个版本，`HEAD^^`表示上上个版本，依次类推，当然，也可以使用`HEAD~n`表示`HEAD`的前`n`个版本（`HEAD^`等价于`HEAD~1`）。
+
+P.S: 貌似在比较高的版本中将`HEAD^`这种语义给剔除掉了，我所使用的版本是2.7.4。
+
+举个例子，创建一个Git仓库，提交3次，提交的message分别写为「version 1」「version 2」「version 3」，通过`git log`命令可以看到这3次提交记录：
+
+```bash
+$ # 创建一个demo，提交3次，通过git log查看3个版本记录
+$ git log --pretty=oneline  # --pretty=oneline选项会让显示结果更简洁一些
+0eb9dceaaf8f86bacd76ee7109edc1fec256b56e version 3
+82be09ef9e1ddb51b41d9b2b36039218673e5a6e version 2
+87e61d64ce34693ad62a23f7ee448ed3d9278f56 version 1
+```
+
+下图是具象化的说明：
+
+<div class="imagediv" style="width: 299px; height: 149px;">{% asset_img version1-version2-version3@2x.png %}</div>
+
+如果想看当前的版本库信息，即`HEAD`指针指向的commit，可以通过`git show HEAD`查看，同样，通过`git show HEAD~<n>`可以查看往前的第`n`个版本信息：
+
+```bash
+$ git show HEAD  # 查看当前版本库信息
+commit 0eb9dceaaf8f86bacd76ee7109edc1fec256b56e
+Author: zhangwei72 <zhangwei72@meituan.com>
+Date:   Sat Jul 23 19:08:05 2016 +0800
+
+    version 3
+    ...
+$ git show HEAD~1  # 查看往前的版本库信息
+commit 82be09ef9e1ddb51b41d9b2b36039218673e5a6e
+Author: zhangwei72 <zhangwei72@meituan.com>
+Date:   Sat Jul 23 19:07:38 2016 +0800
+
+    version 2
+    ...
+```
+
+讲了这么多`HEAD`指针，其实是为了给「通过`git reset`回退版本」作铺垫。
+
+所谓版本回退，根据我的理解，其本质是设置`HEAD`指针的指向，譬如回退到version 2，其实所需要做的是重定向`HEAD`指针到version 2的快照：
+
+<div class="imagediv" style="width: 300px; height: 150px;">{% asset_img set-HEAD-to-version2@2x.png %}</div>
+
+设置`HEAD`指针有两种方式，一种是`git reset <commit-id>`，另一种是通过`git reset HEAD~<n>`。假如当前`HEAD`指针指向version 3，`git reset 82be09e`（82be09e是version 2对应的commit-id的前6位）会将`HEAD`指向到version 2；`git reset HEAD~1`也会有同样的作用。
+
+本文将`HEAD`指针指向到version 2：
 
 ```sh
-$ git remote
-origin 
+$ git reset HEAD~1  # 将HEAD指针指向到前一个版本（version 2）
+$ git show HEAD
+commit 82be09ef9e1ddb51b41d9b2b36039218673e5a6e
+Author: zhangwei72 <zhangwei72@meituan.com>
+Date:   Sat Jul 23 19:07:38 2016 +0800
+
+    version 2
+    ...
 ```
 
-也可以指定选项`-v`，会显示更多信息：
+现在确定当前版本（`HEAD`指针）切换到version 2了，再用`git log`查看commits信息会发现version 3不见了：
 
-```sh
-git remote -v  
-origin	git://github.com/sadjason/sadjason.github.io.git (fetch)
-origin	git://github.com/sadjason/sadjason.github.io.git (push)
+```bash
+$ git log --pretty=oneline
+82be09ef9e1ddb51b41d9b2b36039218673e5a6e version 2
+87e61d64ce34693ad62a23f7ee448ed3d9278f56 version 1
 ```
 
->P.S: 克隆（`git clone`）版本库的时候，所使用的远程主机被Git自动命名为`origin`，如果想使用其他的主机名，需要使用`-o`选项指定，譬如`git clone -o example git://example.com/example.git`。
+问题来了：version 3快照会被删除吗？
 
-`git remote`是一个比较复杂的命令，旗下还包括一些子命令：
+答案是：不会！version 3之所以没有在`git log`报告中显示出来，是因为`git log`的报告结果依赖于`HEAD`指针，它只会将比`HEAD`所指向的commit以及更旧的commits给查询出来。
 
-* `git remote add`，用于**添加远程仓库**，使用起来非常简单，运行`git remote add <name> <url>`即可添加一个新的远程Git仓库，同时指定一个名称（任意）。
-* `git remote show`，用于**查看指定远程仓库的更多信息**，基本使用格式是`git remote show <name>`。
-* `git remote remove`，用于**移除远程仓库**，如果因为一些原因想要移除一个远程仓库，可以使用`git remote remove <name>`命令，`git remote rm`与之等价。
-* `git remote rename`，用于**远程仓库重命名**，基本使用格式是`git remote rename <old_name> <new_name>`。
+那么还有机会将当前版本切换到version 3吗？在Git中，总有后悔药可以吃的。version 3没有被删除，只要知道其commit-id，就可以通过`git reset <commit-id>`切回到version 3。
 
->P.S: 如上所列的几个`git remote`命令，只有`git remote show`需要访问网络，其余几个都是本地操作。以`git remote add`为例，其本质无非是在本地为远程仓库的url创建一个字符串映射（毕竟操作remote repository时输入url并不是一个特别好的体验）。这个字符串映射并没有任何实际意义，可以简单看成是远程仓库url的一个alias。stackoverflow中的[解释](https://stackoverflow.com/questions/5617211/what-is-git-remote-add-and-git-push-origin-master/)更棒一些。既然`git remote add`的本质是为远程仓库的url创建字符串映射，那么这个映射存放在哪里呢？答案是`.git/config`中。
+这就说到另外一个命令：`git reflog`。该命令可以查看所有分支的所有操作记录（包括commit和reset的操作）。简单一句话，可以通过`git reflog`找到version 3的commit-id，有了commit-id，后面的事情就好办了...
 
-**关于git remote的一些补充**
+使用`git reset`重置`HEAD`时，还会涉及几个选项：
 
-笔者在学习过程中对这个命令产生了极大的误解，我以为能够通过`git remote`管理远程（服务器）repository，譬如远程在服务器中创建一个repository。
+* `--mixed`，此为默认选项，除了设置`HEAD`，还额外的将暂存区给清空；
+* `--soft`，此选项除了设置`HEAD`指针，其他的啥都不干；
+* `--hard`，此选项在`--mixed`的基础上还会重置工作区，使得工作区的文件状态和`HEAD`所指向的版本完全一致；
+* `--merge`和`--keep`，这俩选项似乎很少用到，略过不讲；
 
-甚至做了如下的测试：
+P.S: 关于`git reset`的使用，似乎还有很多内容没有说到，以后再另外补充吧！
 
-```
-mkdir MyLocalRepository
-cd MyLocalRepository
-git init
-echo "hello, github" >> README.md
-git add README.md
-git commit -m "add readme file"
-git remote add MyLocalRepository https://github.com/xxoo/MyLocalRepository.git
-```
+还有一个问题：重定向`HEAD`后，如何将`HEAD`之后的commits给永远删掉呢？
 
-其中最后一步，我的目的是在github中创建一个名为MyLocalRepository的仓库，上述命令执行完后没有任何错误信息（UNIX的哲学是没有消息就是好消息）。但我登录github后，发现并没有看到有新的repository添加（而不是使用[Create a New Repository](https://github.com/new)这个接口）。
-
-这个测试说明我对`git remote`的理解有问题，于是去stackoverflow中寻找「可否在本地远程在github上创建repository」问题答案，还真找到了，即[Is it possible to create a remote repository on github from client](http://stackoverflow.com/questions/2423777/is-it-possible-to-create-a-remote-repo-on-github-from-the-cli-without-ssh)。显然，stackoverflow给出的答案是：可以，但是需要通过github的api，这是另外一个故事了，本文不涉入。
-
-**从远程仓库抓取数据 -- git fetch**
-
-从远程仓库中获取数据，可以执行`git fetch <remote-repository-name>`命令，该命令会访问远程仓库，从中拉去所有本地还没有的数据，执行完成后，本地将会拥有那个远程仓库中的所有分支的引用。
-
-默认情况下，`git fetch`取回所有分支的更新，但若只想取回特定分支的更新，可以指定分支名：
-
-```sh
-$ git fetch <remote-repository-name> <branch-name>
-```
-
-使用`git fetch`的一些说明：
-
-* 如果不指定[remote]，则默认执行`git fetch origin`，执行成功的前提是origin存在；
-* `git fetch`可以fetch多个repository，指定选项`--all`即可；
-* `git fetch`仅仅是将指定的远程仓库的所有分支内容全部下载到本地，除此之外不做其他的事情（譬如分支合并）；
-
-**git pull**
-
-待补充
-
-**推送数据到远程仓库 -- git push**
-
-`git push`命令用于将本地分支的更新，推送到远程主机，使用格式是：
-
-```sh
-$ git push <remote-repository-name> <local-branch-name>:<remote-branch-name>
-```
+接下来的Git博客：[Git分支与远程操作](/git-branching-and-remoting/)。
 
 ## 本文参考
 
 * [Pro Git](http://git-scm.com/book/)
 * [Pro Git中文版](https://git-scm.com/book/zh/v2/)
-* [Git远程操作详解](http://www.ruanyifeng.com/blog/2014/06/git_remote.html)
-* [Git教程 -- 廖雪峰](http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000)
-* [GitHub秘籍](https://snowdream86.gitbooks.io/github-cheat-sheet/content/zh/index.html)
-* [What is git-remote-add and git-push-origin-master?](https://stackoverflow.com/questions/5617211/what-is-git-remote-add-and-git-push-origin-master/)
-* [Is it possible to create a remote repo on GitHub from the CLI without opening browser?](http://stackoverflow.com/questions/2423777/is-it-possible-to-create-a-remote-repo-on-github-from-the-cli-without-opening-br)
+* [廖雪峰Git教程之撤销修改](http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/001374831943254ee90db11b13d4ba9a73b9047f4fb968d000)
 
