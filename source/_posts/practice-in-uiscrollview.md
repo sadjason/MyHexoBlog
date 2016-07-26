@@ -206,7 +206,7 @@ func scrollViewDidEndScrollingAnimation(scrollView: UIScrollView) {
 
 **UIScrollView Custom Paging**
 
-通过回调`scrollViewWillEndDragging(_:withVelocity:targetContentOffset:)`可以在UIScrollView#pagingEnabled设为`false`的情况下自己实现paging效果。然而，用户体验并不好，至少不如`UIScrollView#pagingEnabled = true`顺畅，参考[这里](http://stackoverflow.com/questions/6945964/uiscrollview-custom-paging)，不晓得有没什么办法改善操作体验。
+通过回调`scrollViewWillEndDragging(_:withVelocity:targetContentOffset:)`可以在`UIScrollView#pagingEnabled`设为`false`的情况下自己实现paging效果。然而，用户体验并不好，至少不如`UIScrollView#pagingEnabled = true`顺畅，参考[这里](http://stackoverflow.com/questions/6945964/uiscrollview-custom-paging)，不晓得有没什么办法改善操作体验。
 
 
 ## 本文参考

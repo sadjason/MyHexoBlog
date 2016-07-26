@@ -1,6 +1,7 @@
 title: 2015 Objective-C新特性
 date: 2015-06-26 14:39:28
-categories: Objective-C
+tags: Objective-C
+categories: iOS
 
 ---
 
@@ -197,5 +198,4 @@ UIButton *button = view.subviews.lastObject;
 
 ## References
 
-https://msdn.microsoft.com/zh-cn/library/dd799517.aspx
-https://gist.github.com/jtbandes/881f07a955ff2eadd1a0
+* [泛型中的协变和逆变](https://msdn.microsoft.com/zh-cn/library/dd799517.aspx)

@@ -140,7 +140,7 @@ If a custom view has no intrinsic size for a given dimension, it can return UIVi
 
 为了验证这个说法，对上述代码做些改变。
 
-首先定义一个继承自UILabel的类ZWLabel方法，重写ZWLabel的`intrinsicContentSize`方法，如下：
+首先定义一个继承自UILabel的类ZWLabel，重写ZWLabel的`intrinsicContentSize`方法，如下：
 
 ```objc
 @interface ZWLabel : UILabel
@@ -159,12 +159,12 @@ If a custom view has no intrinsic size for a given dimension, it can return UIVi
 @end
 ```
 
-然后让上文的testLabel从UILabel的实例改为ZWLabel的实例，其余不变：
+然后让上文的`testLabel`从`UILabel`的实例改为`ZWLabel`的实例，其余不变：
 
 ```objc
 testLabel = ({
     ZWLabel *label = [[ZWLabel alloc] init];
-    ...
+    //...
     label;
 });
 ```
@@ -181,19 +181,19 @@ P.S：笔者刚开始对`intrinsicContentSize`这个API的用法感到非常疑�
 
 现在看来，第二种理解更靠谱！
 
-对于上文所用到的UILabel，想必Cocoa在实现的`intrinsicContentSize`方法时已经根据`text`属性值和`font`属性值进行了计算。那是不是每个view都实现了`intrinsicContentSize`呢？
+对于上文所用到的`UILabel`，想必Cocoa在实现`intrinsicContentSize`方法时已经根据`text`属性值和`font`属性值进行了计算。那是不是每个原生view都实现了`intrinsicContentSize`呢？
 
-NO！《Auto Layout Guide》在谈论「intrinsic content size」时，总会与另外一个词语「leaf-level views」相关联，譬如：
+NO！《[Auto Layout Guide](https://developer.apple.com/library/watchos/documentation/UserExperience/Conceptual/AutolayoutPG/AutoLayoutConcepts/AutoLayoutConcepts.html)》在谈论「intrinsic content size」时，总会与另外一个词语「leaf-level views」相关联，譬如：
 >**Intrinsic Content Size**
 Leaf-level views such as buttons typically know more about what size they should be than does the code that is positioning them. This is communicated through the **intrinsic content size**, which tells the layout system that a view contains some content that it doesn’t natively understand, and indicates how large that content is, intrinsically.
 
-「leaf-level views」指的是那种一般不包含任何subview的view，譬如UILabel、UIButton等，这类的view往往能够直接计算出content（譬如UILabel的text、UIButton的title，UIImageView的image）的大小。
+「leaf-level views」指的是那种一般不包含任何subview的view，譬如`UILabel`、`UIButton`等，这类的view往往能够直接计算出content（譬如`UILabel`的text、`UIButton`的title，`UIImageView`的image）的大小。
 
-但是有些view不包含content，譬如view，这种view被认为「has no intrinsic size」，它们的`intrinsicContentSize`返回的值是`(-1,-1)`。
+但是有些view不包含content，譬如`UIView`，这种view被认为「has no intrinsic size」，它们的`intrinsicContentSize`返回的值是`(-1,-1)`。
 
 >P.S: 官方文档中说的是：UIView's default implementation is to return (UIViewNoIntrinsicMetric, UIViewNoIntrinsicMetric)，而UIViewNoIntrinsicMetric等于`-1`，为什么是`-1`而不是`0`，我猜是`0`是一个有效的width/height，而`-1`不是，更容易区分处理。
 
-还有一种view虽然包含content，但是`intrinsicContentSize`返回值也是`(-1,-1)`，这类view往往是UIScrollView的子类，譬如UITextView，它们是可滚动的，因此auto layout system在对这类view进行布局时总会存在一些未定因素，Cocoa干脆让这些view的`intrinsicContentSize`返回`(-1,-1)`。
+还有一种view虽然包含content，但是`intrinsicContentSize`返回值也是`(-1,-1)`，这类view往往是`UIScrollView`的子类，譬如`UITextView`，它们是可滚动的，因此auto layout system在对这类view进行布局时总会存在一些未定因素，Cocoa干脆让这些view的`intrinsicContentSize`返回`(-1,-1)`。
 
 **preferredMaxLayoutWidth属性**
 
@@ -205,6 +205,7 @@ Leaf-level views such as buttons typically know more about what size they should
 
 [UILabel Class References](https://developer.apple.com/library/ios/documentation/UIKit/Reference/UILabel_Class/)对它的描述如下：
 >The preferred maximum width (in points) for a multiline label.
+&nbsp;
 **Discussion**
 This property affects the size of the label when layout constraints are applied to it. During layout, if the text extends beyond the width specified by this property, the additional text is flowed to one or more new lines, thereby increasing the height of the label.
 
@@ -236,16 +237,15 @@ testLabel.text = @"天地玄黄 宇宙洪荒 日月盈昃 辰宿列张";
 
 <div class="imagediv" style="width: 320px; height: 120px">{% asset_img 20150716-03.png %}</div>
 
-那么最后testLabel的width是不是就是`preferredMaxLayoutWidth`的属性值呢？No，最终testLabel的属性值小于等于`preferredMaxLayoutWidth`的属性值。
-
+那么最后`testLabel`的width是不是就是`preferredMaxLayoutWidth`的属性值呢？No，最终`testLabel`的属性值小于等于`preferredMaxLayoutWidth`的属性值。
 
 **sizeThatFits:方法和sizeToFit方法**
 
-上文已经提到，UITextView继承自UIScrollView，是可以滚动的，它的`intrinsicContentSize`方法返回值是`(-1,-1)`，auto layout system在处理UITextView对象时，为其设置的size是`(0,0)`。如此看来，似乎UITextView无法体会到auto layout带来的好处了。
+上文已经提到，`UITextView`继承自`UIScrollView`，是可以滚动的，它的`intrinsicContentSize`方法返回值是`(-1,-1)`，auto layout system在处理UITextView对象时，为其设置的size是`(0,0)`。如此看来，似乎`UITextView`无法体验到auto layout带来的好处了。
 
 继续结合应用场景引出`sizeThatFits:`方法和`sizeToFit`方法。
 
-场景三：某个UITextView用于显示文本，让其能够自适应文本，即根据文本自动调整其大小；
+场景三：某个`UITextView`用于显示文本，让其能够自适应文本，即根据文本自动调整其大小；
 
 既然UITextView的content计算方法`intrinsicContentSize`无法向auto layout system传递我们想要传达的值，我们就应该另想别的方法。
 
@@ -262,9 +262,9 @@ The default implementation of this method returns the existing size of the view.
 
 简单来说，调用`sizeThatFits:`方法意味着「根据文本计算最适合UITextView的size」。从功能来讲，`sizeThatFits:`和`intrinsicContentSize`方法比较类似，都是用来计算view的size的。笔者曾一度对二者的关系非常疑惑，甚至觉得二者存在相互调用的关系。后来通过验证发现不是这么回事儿，后文会通过示例说明。
 
-对于显示多行文本的UILabel，为了方便`intrinsicContentSize`方法更方便计算content size，需要指定`preferredMaxLayoutWidth`属性值；对于UITextView的`sizeThatFits:`，似乎有类似的需求，毕竟UITextView也可能会显示多行啊，这样说来，UITextView也有一个`preferredMaxLayoutWidth`属性？
+对于显示多行文本的`UILabel`，为了方便`intrinsicContentSize`方法更方便计算content size，需要指定`preferredMaxLayoutWidth`属性值；对于`UITextView`的`sizeThatFits:`，似乎有类似的需求，毕竟`UITextView`也可能会显示多行啊，这样说来，`UITextView`也有一个`preferredMaxLayoutWidth`属性？
 
-No！`preferredMaxLayoutWidth`属性是iOS 6才引入的，`sizeThatFits:`方法则早得多，况且，UITextView是可以滚动的，哪怕文本不会全部呈现出来，但也可以通过左右或者上下滚动浏览所有内容；传给`sizeThatFits:`的参数（假设为size）是CGSize类型，size.width的功能和UILabel的`preferredMaxLayoutWidth`差不多，指定了UITextView区域的最大宽度，size.height则指定了UITextView区域的最大高度；可能有人问，若传给`sizeThatFits:`的size小于UITextView.text面积怎么办，岂不是有些内容无法显示出来？傻啊，可以滚啊！
+No！`preferredMaxLayoutWidth`属性是iOS 6才引入的，`sizeThatFits:`方法则早得多，况且，`UITextView`是可以滚动的，哪怕文本不会全部呈现出来，但也可以通过左右或者上下滚动浏览所有内容；传给`sizeThatFits:`的参数（假设为size）是`CGSize`类型，size.width的功能和`UILabel`的`preferredMaxLayoutWidth`差不多，指定了`UITextView`区域的最大宽度，size.height则指定了`UITextView`区域的最大高度；可能有人问，若传给`sizeThatFits:`的size小于`UITextView`的text面积怎么办，岂不是有些内容无法显示出来？傻啊，可以滚啊！
 
 值得一提的是，调用`sizeThatFits:`并不改变view的size，它只是让view根据已有content和给定size计算出最合适的view.size。
 
@@ -281,6 +281,7 @@ CGSize size = [self sizeThatFits:self.bounds.size];
 CGRect bounds = self.bounds;
 bounds.size.width = size.width;
 bounds.size.height = size.width;
+self.bounds = bounds;
 ```
 
 P.S：值得一提的是，经过测试发现，当调用`sizeThatFits:`的`size=(width, height)`，当width/height的值为0时，width/height似乎就被认为是无穷大！
@@ -289,7 +290,7 @@ P.S：值得一提的是，经过测试发现，当调用`sizeThatFits:`的`size
 
 首先来看一个应用场景。
 
-场景四：某个UIView，宽度等于屏幕宽度，包含两个UILabel，两个Label都可能显示多行文本，要求：结合auto layout让UIView大小能够自适应subviews。
+场景四：某个`UIView`，宽度等于屏幕宽度，包含两个`UILabel`，两个label都可能显示多行文本，要求结合auto layout让`UIView`大小能够自适应subviews。
 
 Easy，给出如下代码：
 
@@ -362,7 +363,7 @@ Easy，给出如下代码：
 
 代码中除了添加各种各样的constraints，没有任何设置frame的代码，显然都是基于auto layout的。
 
-那么问题来了，理解label1和label2的布局没啥子问题，因为它们的`intrinsicContentSize`方法会将content size告诉auto layout system，进而后者会为它们的size设置对应值；但对于bgView，它可是一个UIView对象，它的`intrinsicContentSize`回调方法的返回值为`(-1,-1)`，那么auto layout system是如何为它设置合适的size的呢？
+那么问题来了，理解label1和label2的布局没啥子问题，因为它们的`intrinsicContentSize`方法会将content size告诉auto layout system，进而后者会为它们的size设置对应值；但对于bgView，它可是一个`UIView`对象，它的`intrinsicContentSize`回调方法的返回值为`(-1,-1)`，那么auto layout system是如何为它设置合适的size的呢？
 
 根据我的理解，auto layout system在处理某个view的size时，参考值包括：
 * 自身的`intrinsicContentSize`方法返回值；
@@ -399,11 +400,11 @@ height=max{10+size1.height+10+size2.height+10, size3.height}
 
 P.S：然而，我知道，事实往往并没有这么简单，当处理自定义View时，当constraints设置不完整或者冲突时，事情总会变得复杂起来，也总会得到意想不到的结果。但，暂且就这么理解吧！
 
-罗莉啰嗦写了这么多，还没引出`systemLayoutSizeFittingSize:`方法...
+啰里啰嗦写了这么多，还没引出`systemLayoutSizeFittingSize:`方法...
 
 OK，再来看另外一个应用场景。
 
-场景五：某个UIView，宽度等于屏幕宽度，包含一个UILabel和一个UITextView，二者都可能显示多行文本，要求：结合auto layout让UIView大小能够自适应subviews。
+场景五：某个`UIView`，宽度等于屏幕宽度，包含一个`UILabel`和一个`UITextView`，二者都可能显示多行文本，要求结合auto layout让`UIView`大小能够自适应subviews。
 
 在场景四代码基础上将label2改为UITextView对象textView1，如下：
 
@@ -516,6 +517,7 @@ height = bgView.height-10-label1.height-10-10;
 
 [UIView Class References](https://developer.apple.com/library/ios/documentation/UIKit/Reference/UIView_Class/)对该方法描述如下：
 >Returns the size of the view that satisfies the constraints it holds.
+&nbsp;
 **Return Value**
 The size of the view that satisfies the constraints it holds.
 &nbsp;
@@ -537,7 +539,7 @@ P.S：这纯属个人使用体验。
 
 在刚开始接触这几个API时感到非常困惑。分不清`intrinsicContentSize`、`sizeThatFits:`以及`systemLayoutSizeFittingSize:`的区别。经过这么将近一天的折腾，现在大概有了基本的判断。
 
-首先说`intrinsicContentSize`，它的最主要作用是告诉auto layout system的一些信息，可以认为它是后者的回调方法，auto layout system在对view进行布局时会参考这个回调方法的返回值；一般很少像`CGSize size = [view intrinsicContentSize]`去使用`intrinsicContentSize` API。
+首先说`intrinsicContentSize`，它的最主要作用是告诉auto layout system一些信息，可以认为它是后者的回调方法，auto layout system在对view进行布局时会参考这个回调方法的返回值；一般很少像`CGSize size = [view intrinsicContentSize]`去使用`intrinsicContentSize` API。
 
 再来看`sizeThatFits:`和`systemLayoutSizeFittingSize:`，它们俩非常相似，都是为开发者直接服务的API（而不是回调方法）。所不同的是，`sizeThatFits:`是auto layout之前就存在的，一般在leaf-level views中用得比较多，在计算size过程中，它可不会考虑constraints神马的；对于`systemLayoutSizeFittingSize:`，它是随着auto layout（iOS 6）引入的，用于在view完成布局前获取size值，如果view的constraints确保了完整性和正确性，通常它的返回值就是view完成布局之后的view.frame.size的值。
 
