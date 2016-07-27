@@ -89,11 +89,11 @@ id objc_msgSend(id self, SEL op, ...)
 id returnValue = objc_msgSend(someObject, @selector(messageName:), parameter);
 ```
 
-在runtime，`objc_msgSend`会依据receiver（即上述对象someObject）和选择子类型来调用适当的方法。为了完成此操作，该方法需要在接收者所属的类中搜寻其「方法列表」（关于方法列表，详见[methodLists](/unstanding-objective-c-runtime-part-1/#objc_class和isa)），如果能找到与选择子匹配的方法，就调至其实现的代码。若找不到，那就沿着继承体系继续向上查找，等找到合适的方法之后再跳转。如果最终还找不到相匹配的方法，那就执行**消息转发**（message forwarding）操作，这会在下一篇[博客](/unstanding-objective-c-runtime-part-3/)中阐述。
+在runtime，`objc_msgSend`会依据receiver（即上述对象someObject）和选择子类型来调用适当的方法。为了完成此操作，该方法需要在接收者所属的类中搜寻其「方法列表」（关于方法列表，详见[methodLists](/understanding-objective-c-runtime-part-1/#objc_class和isa)），如果能找到与选择子匹配的方法，就调至其实现的代码。若找不到，那就沿着继承体系继续向上查找，等找到合适的方法之后再跳转。如果最终还找不到相匹配的方法，那就执行**消息转发**（message forwarding）操作，这会在下一篇[博客](/understanding-objective-c-runtime-part-3/)中阐述。
 
 如此看来，Objective-C在runtime调用一个方法似乎需要很多步骤。所幸的是，`objc_msgSend`会将匹配结果缓存在快速映射表（fast map）里面，每个类都有这样一块缓存，若是稍后还想该类发送与选择子相同的方法，那么查找起来就很快了。
 
-P.S: 上一篇博客《[理解Objective-C Runtime（一）预备知识](/unstanding-objective-c-runtime-part-1/)》中在介绍`objc_class`结构体时谈到了其中一个变量`cache`，但简单忽略飘过；其实，根据我的理解，这里的快速映射表所对应的就是`objc_class`中的变量`cache`。
+P.S: 上一篇博客《[理解Objective-C Runtime（一）预备知识](/understanding-objective-c-runtime-part-1/)》中在介绍`objc_class`结构体时谈到了其中一个变量`cache`，但简单忽略飘过；其实，根据我的理解，这里的快速映射表所对应的就是`objc_class`中的变量`cache`。
 
 诚然，即便有这种快速映射表机制，执行速度还是不如静态绑定。实际上，对于当前这种硬件平台，这点速度差根本不值一提。
 

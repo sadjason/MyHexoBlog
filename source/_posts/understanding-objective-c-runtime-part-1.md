@@ -22,7 +22,6 @@ categories: iOS
 
 看了一些大牛的博客之后，对Objective-C Runtime的重要性在心里基本有谱了，但路要一步一步走，饭要一口一口吃，先将一些基础性的概念进行整理，「消息转发」「Method Swizzling」之类的高端东西放在之后的博客分析吧！
 
-
 ## 关于Objective-C Runtime
 
 **Runtime的学习资源**
@@ -47,9 +46,9 @@ Runtime的学习资源非常丰富，下面是个人的一些整理：
     4. 《[刨根问底Objective－C Runtime（4）－ 成员变量与属性](http://t.cn/R7mdOq1)》；
 * 《[继承自NSObject的不常用又很有用的函数（2）](http://www.cnblogs.com/biosli/p/NSObject_inherit_2.html)》；
 
->P.S: 值得一提的是，Objective-C Runtime是开源的，任何时候都能从http://opensource.apple.com中获取源代码。
+>P.S: 值得一提的是，Objective-C Runtime是开源的，任何时候都能从[opensource](http://opensource.apple.com)中获取源代码。
 
-**动态语言vs静态语言**
+**动态语言v.s静态语言**
 
 在网上阅读Objective-C Runtime相关的信息时都提到了「Objective-C是一门动态语言...」「作为一门动态语言...」之类的字眼，这让我有些诧异。因为根据我之前的理解：虽然动态和静态语言都是相对的，但Objective-C怎么也不算动态语言吧！动态语言是Python、Javascript这种弱类型语言吧？！
 
@@ -59,7 +58,7 @@ Runtime的学习资源非常丰富，下面是个人的一些整理：
 
 P.S: 后来又仔细阅读了一下《Effective Objective-C 2.0》，其中对「Objective-C是动态语言」有更好的佐证，后面阐述「Objective-C的消息传递机制」时再补充说明吧！
 
-P.S: 关于OC是动态语言这个话题，总会少不了「动态特性」「动态类型」「动态绑定」这几个关键词的讨论分析，笔者在博文《[Objective-C基础知识](/2015/04/12/Basics-in-Objective-C/#多态、动态类型和动态绑定)》中进行了简单的概述。
+P.S: 关于OC是动态语言这个话题，总会少不了「动态特性」「动态类型」「动态绑定」这几个关键词的讨论分析，之前在《[Objective-C基础知识](/basics-in-objective-c/#多态、动态类型和动态绑定)》中进行了简单的概述。
 
 **Runtime是什么**
 
@@ -75,30 +74,33 @@ Runtime是什么？为什么有Runtime这个东东？
 
 ## 关于Runtime的一些术语
 
-各种Runtime资料中有很多术语，有些是以前认识但理解不深刻的，譬如id、Class，有些是很少接触的，譬如isa。
+各种Runtime资料中有很多术语，有些是以前认识但理解不深刻的，譬如`id`、`Class`，有些是很少接触的，譬如`isa`。
 
 为了更好地理解Runtime，先了解Runtime的一些术语是非常必要的。
 
-首先简单提一下`objc_class`，它是一个结构体，其中包含一些类信息；然后是objc_object，它也是一个结构体，但它只包括一个条目，isa，后者是一个objc_class指针；
+首先简单提一下`objc_class`，它是一个结构体，其中包含一些类信息；然后是`objc_object`，它也是一个结构体，但它只包括一个条目 -- `isa`，后者是一个`objc_class`指针；
 
-其实，说到底，NSObject就是建立在objc_class这个结构体之上的，所以了解objc_class对于了解NSObject以及Cocoa的对象模型是非常重要的。
+P.S: 为了查看方便，把`objc_class`、`objc_object`等的定义源码都拷贝出来了，详见{% asset_link foo.c %}。
 
-P.S: objc_class和isa相对而言信息量比较大，后文再详细阐述。
 
-OK，接着来看建立在objc_class和objc_object基础之上的一些关键字。
+其实，说到底，`NSObject`就是建立在`objc_class`这个结构体之上的，所以了解`objc_class`对于了解`NSObject`以及Cocoa的对象模型是非常重要的。
+
+P.S: `objc_class`和`isa`相对而言信息量比较大，后文再详细阐述。
+
+OK，接着来看建立在`objc_class`和`objc_objec`t基础之上的一些关键字。
 
 **Class**
 
-Class（不是class哦），它在`<objc/objc.h>`中定义，如下：
+`Class`（不是class哦），它在`<objc/objc.h>`中定义，如下：
 
 ```c
 /// An opaque type that represents an Objective-C class.
 typedef struct objc_class *Class;
 ```
 
-可以看到Class其实是一种指针类型，即用于指向objc_class结构体。NSObject中定义的方法`- (Class)class;`用于返回其对应的objc_class结构体指针；
+可以看到`Class`其实是一种指针类型，即用于指向`objc_class`结构体。`NSObject`中定义的方法`-(Class)class`用于返回其对应的`objc_class`结构体指针；
 
-除了`- (Class)class;`方法之外，NSObject类中还有一些常见方法包含Class类型参数或者返回Class类型返回值，如下：
+除了`-(Class)class`方法之外，`NSObject`类中还有一些常见方法包含`Class`类型参数或者返回`Class`类型返回值，如下：
 
 ```objc
 - (Class)class;
@@ -112,7 +114,7 @@ typedef struct objc_class *Class;
 
 **id**
 
-对于有过iOS开发经验的人而言，id使用太广泛了，不过似乎对它还没有过比较深入的理解；事实上，一直以为id和`NSObject *`等价呢！现在看来，这种理解太naive了，它也在`<objc/objc.h>`中定义：
+对于有过iOS开发经验的人而言，`id`使用太广泛了，不过似乎对它还没有过比较深入的理解；事实上，一直以为`id`和`NSObject *`等价呢！现在看来，这种理解太naive了，它也在`<objc/objc.h>`中定义：
 
 ```c
 struct objc_object {
@@ -131,7 +133,7 @@ typedef struct objc_object *id;
 typedef struct objc_selector *SEL;
 ```
 
-没找到objc_selector的定义，但根据网友的描述：其实它就是个映射到「方法」的C字符串，可以用Objc编译器命令`@selector()`或者Runtime系统的`sel_registerName`函数来获得一个SEL类型的「方法选择器」（通常简称「选择子」）。
+没找到`objc_selector`的定义，但根据网友的描述：其实它就是个映射到方法的C字符串，可以用Objc编译器命令`@selector()`或者Runtime系统的`sel_registerName`函数来获得一个SEL类型的方法选择器（通常简称：选择子）。
 
 考虑到Xcode对`@selector`的支持比对`sel_registerName`的支持更好，所以`@selector`貌似用得更多一些，但有时候`sel_registerName`或许更简洁一些。
 
@@ -143,7 +145,7 @@ if ([self.selectedViewController respondsToSelector:@selector(isReadyForEditing)
 }
 ```
 
-但当前上下文中没有isReadyForEditing这个方法，所以编译器会有警告；当然，可以有各种方式来关闭警告，如下是其中一种：
+但当前上下文中没有`isReadyForEditing`这个方法，所以编译器会有警告；当然，可以有各种方式来关闭警告，如下是其中一种：
 
 ```objc
 #pragma clang diagnostic push
@@ -201,7 +203,7 @@ typedef struct objc_category *Category;
 typedef struct objc_property *objc_property_t;
 ```
 
-可以通过class_copyPropertyList和protocol_copyPropertyList方法来获取类（Class）和协议（Protocol）中的属性，获取属性之后，还可以使用property_getName获取属性的名字（C字串）：
+可以通过`class_copyPropertyLis`t和`protocol_copyPropertyList`方法来获取类（Class）和协议（Protocol）中的属性，获取属性之后，还可以使用`property_getName`获取属性的名字（C字串）：
 
 ```objc
 objc_property_t *class_copyPropertyList(Class cls, unsigned int *outCount);
@@ -252,17 +254,17 @@ score
 */
 ```
 
-这个示例的执行结果也从侧面反映出了，NSObject中没有定义属性（只有一个叫isa成员变量）。
+这个示例的执行结果也从侧面反映出了，`NSObject`中没有定义属性（只有一个叫`isa`成员变量）。
 
-P.S: 属性 vs 成员变量？这里留个尾巴，以后把这个问题也分析一下吧！
+P.S: 属性v.s成员变量？这里留个尾巴，以后把这个问题也分析一下吧！
 
 ## objc_class和isa
 
-把objc_class和isa单独拧出来的原因是它们的信息量比较大，稍微复杂一点！
+把`objc_class`和`isa`单独拧出来的原因是它们的信息量比较大，稍微复杂一点！
 
-Objective-C是一种面向对象的语言。按照面向对象语言的设计原则，所有事物都应该是对象（严格来说Objective-C并没有完全做到这一点，因为它有象int, double这样的简单变量类型）。所以一定要有这个认识：**Objective-C中，类也是对象**。
+Objective-C是一种面向对象的语言。按照面向对象语言的设计原则，所有事物都应该是对象（严格来说Objective-C并没有完全做到这一点，因为它有象`int`, `double`这样的简单变量类型）。所以一定要有这个认识：**Objective-C中，类也是对象**。
 
-在Cocoa中，所有类都继承自NSObject，参考NSObject在`<objc/NSObject.h>`中的定义如下：
+在Cocoa中，所有类都继承自`NSObject`，参考`NSObject`在`<objc/NSObject.h>`中的定义如下：
 
 ```objc
 @interface NSObject <NSObject> {
@@ -270,7 +272,7 @@ Objective-C是一种面向对象的语言。按照面向对象语言的设计原
 }
 ```
 
-objc_class的定义如下：
+`objc_class`的定义如下：
 
 ``` C
 struct objc_class {
@@ -291,25 +293,26 @@ struct objc_class {
 }
 ```
 
-可以知道在运行时，所有类对象都有一个名为「isa」的指针，这个指针指向一个objc_class结构体，objc_class结构体中包含一些与类相关的信息。问题是这个isa指向的objc_class结构体的信息所对应的是自己的信息还是对应的类的信息呢？当然是其所对应的类的信息，存储了变量列表、方法列表、遵守的协议列表等等。
+可以知道在运行时，所有类对象都有一个名为`isa`的指针，这个指针指向一个`objc_class`结构体，`objc_class`结构体中包含一些与类相关的信息。问题是这个`isa`指向的`objc_class`结构体的信息所对应的是自己的信息还是对应的类的信息呢？当然是其所对应的类的信息，存储了变量列表、方法列表、遵守的协议列表等等。
 
-简单来说，「isa」指针被称为「is a」指针，顾名思义，它告诉了对象所属的类信息，描述「aX is a X」。
+简单来说，`isa`指针被称为「is a」指针，顾名思义，它告诉了对象所属的类信息，描述「aX is a X」。
 
-某个对象的isa指针指向的objc_class结构体存放的是其所对应的**类**的「元数据」（metadata），通过它我们可以知道该对象：所对应类的名字（name）、可以做哪些事情（objc_method_list是个二维方法列表）、包括哪些对成员变量（objc_ivar_list）、遵守哪些协议（protocols）。
+某个对象的`isa`指针指向的`objc_class`结构体存放的是其所对应的类的元数据（metadata），通过它我们可以知道该对象：所对应类的名字（`name`）、可以做哪些事情（`objc_method_list`是个二维方法列表）、包括哪些成员变量（`objc_ivar_list`）、遵守哪些协议（`protocols`）。
 
-回到objc_class，可以看到objc_class结构体首变量也是一个isa指针，这也印证了「类也是对象」这个说法。对象的isa指针指向的是该对象的本类，而类的isa指针指向的另外一个类被称为「元类」（metaclass），用来表述类本身所表具备的元数据，类方法就定义于此；也正因为类本身也是一个对象，所以类本身可以接收消息。譬如：考虑到NSObject类本身也是一个对象（是metaclass的一个对象，常称之为「类类型对象」），所以`[NSObject alloc]`其实可以看成是对NSObject这个类类型对象发送一个消息（调用器alloc实例方法）。
+回到`objc_class`，可以看到`objc_class`结构体首变量也是一个`isa`指针，这也印证了「类也是对象」这个说法。对象的`isa`指针指向的是该对象的本类，而类的`isa`指针指向的另外一个类被称为**元类**（metaclass），用来表述类本身所表具备的元数据，类方法就定义于此；也正因为类本身也是一个对象，所以类本身可以接收消息。譬如：考虑到`NSObject`类本身也是一个对象（是metaclass的一个对象，常称之为**类类型对象**），所以`[NSObject alloc]`其实可以看成是对`NSObject`这个类类型对象发送一个消息（调用器`alloc`实例方法）。
 
-除了isa指针之外，objc_class结构体中还有一个变量super_class，它指向了是这个类的超类（super class），可以看到这个super_class不是一个一位数组，而是一个单独的指针，即一个类有且仅有一个super class，即所谓的「单继承」。
+除了`isa`指针之外，`objc_class`结构体中还有一个变量`super_class`，它指向了是这个类的超类（super class），可以看到这个`super_class`不是一个一位数组，而是一个单独的指针，即一个类有且仅有一个super class，即所谓的「单继承」。
 
-关于isa和super_class的更直观描述，还请看图：
-![class-diagram.jpg](/img/201504/class-diagram.png)
+关于`isa`和`super_class`的更直观描述，还请看图：
 
-到了这里，Objective-C的对象模型基本上解释清楚了；可能还有一个问题：最终的元类是啥？在Cocoa中，所有类都继承自NSObject，而NSObject的元类（不晓得叫什么名字，假设叫NSObjectMetaClass）（上图中右上角的方框）也继承自NSObject。有些绕，具体来说，NSObject和NSObjectMetaClass的isa指针和super_class指针指向情况是这样的：
+<div class="imagediv" style="width: 274px; height = 287px">{% asset_img class-diagram.png %}</div>
 
-* NSObject的isa指针NSObjectMetaClass（终极meta class），NSObjectMetaClass指针指向自己；
-* NSObject的super_class指针指向nil，NSObjectMetaClass的super_class指向NSObject；
+到了这里，Objective-C的对象模型基本上解释清楚了；可能还有一个问题：最终的元类是啥？在Cocoa中，所有类都继承自`NSObject`，而`NSObject`的元类（不晓得叫什么名字，假设叫`NSObjectMetaClass`）（上图中右上角的方框）也继承自`NSObject`。有些绕，具体来说，`NSObject`和`NSObjectMetaClass`的`isa`指针和`super_class`指针指向情况是这样的：
 
-这样就完了？！No！Objective-C的对象模型还有信息可挖，回过头来看objc_class的ivars变量和methodLists变量：
+* `NSObject`的`isa`指针`NSObjectMetaClass`（终极meta class），`NSObjectMetaClass`指针指向自己；
+* `NSObject`的`super_class`指针指向`nil`，`NSObjectMetaClass`的`super_class`指向`NSObject`；
+
+这样就完了？！No！Objective-C的对象模型还有信息可挖，回过头来看`objc_class`的`ivars`变量和`methodLists`变量：
 
 ```c
 struct objc_class {
@@ -318,16 +321,16 @@ struct objc_class {
 }
 ```
 
-在运行时，类（包括class和metaclass）的objc_class结构体是固定的，不可能往这个结构体中添加数据，只能修改！譬如可以修改isa指针，让它指向一个中间类；在我的理解里，应该也可以修改ivars和methodLists，让它们指向一个新的区域；若可以这样，那么就可以在运行时随意添加/修改/删除成员变量和方法了。
+在运行时，类（包括class和metaclass）的`objc_class`结构体是固定的，不可能往这个结构体中添加数据，只能修改！譬如可以修改`isa`指针，让它指向一个中间类；在我的理解里，应该也可以修改`ivars`和`methodLists`，让它们指向一个新的区域；若可以这样，那么就可以在运行时随意添加/修改/删除成员变量和方法了。
 
-但是，貌似Objective-C Runtime没有提供修改ivars和methodLists指针值的接口。
+但是，貌似Objective-C Runtime没有提供修改`ivars`和`methodLists`指针值的接口。
 
-也因此，ivars在运行时指向的是一个固定区域，当然可以修改这个区域的值了，但这其实只是修改成员变量值而已；「在这个内存区域后面续上一段空余区域用于存放新的成员变量」？呵呵，想多了吧！因此，我们没办法在运行时为对象添加成员变量，这解释了为什么category中不能定义property（dynamic property不算）；
+也因此，`ivars`在运行时指向的是一个固定区域，当然可以修改这个区域的值了，但这其实只是修改成员变量值而已；「在这个内存区域后面续上一段空余区域用于存放新的成员变量」？呵呵，想多了吧！因此，我们没办法在运行时为对象添加成员变量，这解释了为什么category中不能定义property（dynamic property不算）；
 
-P.S: 那为什么protocol中可以添加变量，在我的理解里，protocol是在编译器处理的。所以objc_class中有一个变量叫protocols；
+P.S: 那为什么protocol中可以添加变量，在我的理解里，protocol是在编译器处理的。所以`objc_class`中有一个变量叫`protocols`；
 
-和ivars不同，methodLists是一个二维数组。虽然我们没办法扩展methodLists指向的内存区域，但是我们可以改变这个内存区域（这个内存区域存储的都是指针）的值。因此，我们可以在运行时动态添加（以及做其他的处理，譬如交换等）方法！
+和`ivars`不同，`methodLists`是一个二维数组。虽然我们没办法扩展`methodLists`指向的内存区域，但是我们可以改变这个内存区域（这个内存区域存储的都是指针）的值。因此，我们可以在运行时动态添加（以及做其他的处理，譬如交换等）方法！
 
-P.S: objc_class结构体中还有一个变量cache，顾名思义，它是用于缓存的，缓存啥呢？缓存方法，下一篇博客阐述「消息传递机制」时会谈到这个。
+P.S: `objc_class`结构体中还有一个变量`cache`，顾名思义，它是用于缓存的，缓存啥呢？缓存方法，下一篇博客阐述「消息传递机制」时会谈到这个。
 
 到了这里，谁还敢说Objective-C不是动态语言？

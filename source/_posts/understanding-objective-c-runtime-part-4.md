@@ -7,14 +7,14 @@ categories: iOS
 
 ---
 
-Objective-C对象收到消息之后，究竟会调用何种方法需要在运行期间才能解析出来。那你也许会问：与给定的选择子名称相应的方法是不是也可以在runtime改变呢？没错，就是这样。**若能善用此特性，则可发挥出巨大优势，因为我们既不需要源代码，也不需要通过继承子类来覆写方法就能改变这个类本身的功能**。这样一来，新功能将在本类的所有实例中生效，而不仅限于覆写了相关方法的那些子类实例。此方案就是大名鼎鼎的「**method swizzling**」，中文常称之为「方法调配」或「方法调和」或「方法混合」。
+Objective-C对象收到消息之后，究竟会调用何种方法需要在运行期间才能解析出来。那你也许会问：与给定的选择子名称相应的方法是不是也可以在runtime改变呢？没错，就是这样。**若能善用此特性，则可发挥出巨大优势，因为我们既不需要源代码，也不需要通过继承子类来覆写方法就能改变这个类本身的功能**。这样一来，新功能将在本类的所有实例中生效，而不仅限于覆写了相关方法的那些子类实例。此方案就是大名鼎鼎的**method swizzling**，中文常称之为「方法调配」或「方法调和」或「方法混合」。
 
 
 ## Method Swizzling
 
-**类的方法列表会把选择子的名称映射到相关的方法实现之上**，使得**动态消息派发系统**（dynamic message-dispatch system）能够据此找到应该调和的方法。这些方法均以函数指针的形式来表示，这种指针叫IMP（IMP在《[理解Objective-C Runtime（一）预备知识](/unstanding-objective-c-runtime-part-1/)》已有说明）。
+**类的方法列表会把选择子的名称映射到相关的方法实现之上**，使得**动态消息派发系统**（dynamic message-dispatch system）能够据此找到应该调和的方法。这些方法均以函数指针的形式来表示，这种指针叫IMP（IMP在《[理解Objective-C Runtime（一）预备知识](/understanding-objective-c-runtime-part-1/)》已有说明）。
 
-举个栗子，NSString类可以响应lowercaseString、uppercaseString、capitalizedString等选择子。这张映射表（selector table，也常称为「选择器表」）中的每个选择子都映射到不同的IMP之上，如下图所示：
+举个栗子，`NSString`类可以响应`lowercaseString`、`uppercaseString`、`capitalizedString`等选择子。这张映射表（selector table，也常称为**选择器表**）中的每个选择子都映射到不同的IMP之上，如下图所示：
 
 <div class="imagediv" style="width: 500px; height: 200px">{% asset_img QQ20150428-1.png %}</div>
 
@@ -26,7 +26,7 @@ Objective-C runtime系统提供的几个方法都能够用来操作这张表。�
 
 ## 交换两个方法的实现
 
-现在通过示例代码演绎『调换NSString的lowercaseString和uppercaseString的方法实现』，具体实现操作是这样的：
+现在通过示例代码演绎「调换`NSString`的`lowercaseString`和`uppercaseString`的方法实现」，具体实现操作是这样的：
 
 ```objc
 - (void)viewDidLoad {
@@ -95,7 +95,7 @@ uppercase of the string : abcdefg
 }
 ```
 
-这种方式的缺点也很明显：它破坏了代码的干净整洁。因为Logging的代码本身并不属于ViewController里的主要逻辑。随着项目扩大、代码量增加，你的ViewController里会到处散布着Logging的代码。这时，要找到一段事件记录的代码会变得困难，也很容易忘记添加事件记录的代码。
+这种方式的缺点也很明显：它破坏了代码的干净整洁。因为Logging的代码本身并不属于View Controller里的主要逻辑。随着项目扩大、代码量增加，你的View Controller里会到处散布着Logging的代码。这时，要找到一段事件记录的代码会变得困难，也很容易忘记添加事件记录的代码。
 
 你可能会想到用继承或类别，在重写的方法里添加事件记录的代码。代码可以是长的这个样子：
 
@@ -120,8 +120,8 @@ uppercase of the string : abcdefg
 }
 ```
 Logging 的代码都很相似，通过继承或类别重写相关方法是可以把它从主要逻辑中剥离出来。但同时也带来新的问题：
-1. 你需要继承UIViewController，UITableViewController，UICollectionViewController所有这些ViewController，或者给他们添加类别；
-2. 每个ViewController里的ButtonClick方法命名不可能都一样；
+1. 你需要继承`UIViewController`，`UITableViewController`，`UICollectionViewController`所有这些View Controller，或者给他们添加类别；
+2. 每个View Controller里的ButtonClick方法命名不可能都一样；
 3. 你不能控制别人如何去实例化你的子类；
 4. 对于类别，你没办法调用到原来的方法实现，大多时候，我们重写一个方法只是为了添加一些代码，而不是完全取代它；
 5. 如果有两个类别都实现了相同的方法，运行时没法保证哪一个类别的方法会给调用。
@@ -167,9 +167,9 @@ method_exchangeImplementations(originalMethod, swappedMethod);
 
 **补充**
 
-后来终于有机会在实际项目中使用到method swizzling。应用场景是这样的，接手了一个完整的项目，我的任务是在该项目基础上添加一些功能，顺便将项目整理一下，尽可能清理没有用的内容和过时的技术。项目页面非常多，各种文件的命名非常糟糕，我首先需要做的事情是将页面逻辑给整理出来（各种ViewController之间的逻辑关系），简单来说，我需要结合所看到的运行页面（譬如首页），将它的ViewController类给找出来。
+后来终于有机会在实际项目中使用到method swizzling。应用场景是这样的，接手了一个完整的项目，我的任务是在该项目基础上添加一些功能，顺便将项目整理一下，尽可能清理没有用的内容和过时的技术。项目页面非常多，各种文件的命名非常糟糕，我首先需要做的事情是将页面逻辑给整理出来（各种View Controller之间的逻辑关系），简单来说，我需要结合所看到的运行页面（譬如首页），将它的View Controller类给找出来。
 
-比较蠢的做法当然是去查看代码了。好在我比较机灵，决定使用method swizzling技术，让每个页面将它的ViewController类名自己喊出来。
+比较蠢的做法当然是去查看代码了。好在我比较机灵，决定使用method swizzling技术，让每个页面将它的View Controller类名自己喊出来。
 
 我的思路：定义一个UIViewController category，添加一个方法，该方法调用`viewDidAppear:`，并且将该类的名字给打印出来，然后将该方法的SEL和`viewDidAppear:`方法的SEL调换，这样系统在回调`viewDidAppear:`时会定义该方法代码，如下：
 
