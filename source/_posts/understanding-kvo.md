@@ -57,7 +57,7 @@ AFNetworking作者Mattt Thompson在《[Key-Value Observing](http://nshipster.com
 
 总之，两位大神都认为KVO的API非常差劲！
 
-其中《[KVO Considered Harmful](http://khanlou.com/2013/12/kvo-considered-harmful/)》中对KVO的槽点有了比较详细的阐述，这一部分内容就取材于此。
+其中《[KVO Considered Harmful](http://khanlou.com/2013/12/kvo-considered-harmful/)》中对KVO的槽点有比较详细的阐述，这一部分内容就取材于此。
 
 为了更好说明这些槽点，假设一个应用场景：`ZWTableViewController`继承自`UITableViewController`，它现在需要做一件事情，即监测`self.tableView.contentSize`的变化，现采用典型的方式（即KVO）处理这么个需求。
 
@@ -121,7 +121,7 @@ KVO严重依赖string，换句话说，KVO中的keyPath必须是`NSString`这个
 }
 ```
 
-**多次相同的removeObserver会导致crash**
+**多次相同的remove observer会导致crash**
 
 写过KVO代码的人都知道，对同一个对象执行两次remove observer操作会导致程序crash。
 
@@ -139,7 +139,7 @@ KVO严重依赖string，换句话说，KVO中的keyPath必须是`NSString`这个
 
 《[KVO Considered Harmful](http://khanlou.com/2013/12/kvo-considered-harmful/)》中还有很多其他的槽点，《[Key-Value Observing Done Right](https://www.mikeash.com/pyblog/key-value-observing-done-right.html)》也描述了一些，这里就不多说了，更多信息还是建议看原文。
 
-不过好在上述的槽点「严重依赖于string」和「多次相同的removeObserver会导致crash」有比较好的解决方案，如下会讲到。
+不过好在上述的槽点「严重依赖于string」和「多次相同的remove observer会导致crash」有比较好的解决方案，如下会讲到。
 
 ## 使用KVO
 
@@ -180,7 +180,7 @@ KVO中与订阅相关的API只有一个：
 
 options信息量稍大，但其实蛮好理解的，然而对于context，在写这篇博客之前，一直不知道context参数有啥用（也没在意）。
 
-context作用大了去了，在上面的**KVO的槽点**中提到一个槽点「多次相同的removeObserver会导致crash」。导致「多次调用相同的remove observer」一个很重要的原因是我们经常在add observer时为context参数赋值`NULL`，关于如何使用context参数，下面会提到。
+context作用大了去了，在上面的**KVO的槽点**中提到一个槽点「多次相同的remove observer会导致crash」。导致「多次调用相同的remove observer」一个很重要的原因是我们经常在add observer时为context参数赋值`NULL`，关于如何使用context参数，下面会提到。
 
 ### 响应
 
@@ -202,9 +202,9 @@ UIButton *button = [UIButton new];
 
 除了`NSDictionary`类型参数change之外，其余几个参数都能在`addObserver:forKeyPath:options:context:`找到对应。
 
-change参数上文已经讲过了，这里不多说了。下面将针对「严重依赖于string」和「多次相同的removeObserver会导致crash」这两个槽点对keyPath和context参数进行阐述。
+change参数上文已经讲过了，这里不多说了。下面将针对「严重依赖于string」和「多次相同的remove observer会导致crash」这两个槽点对keyPath和context参数进行阐述。
 
-**keyPath**。keyPath的类型是NSString，这导致了我们使用了错误的keyPath而不自知，譬如将`@"contentSize"`错误写成`@"contentsize"`，一个更好的方法是不直接使用`@"xxxoo"`，而是积极使用`NSStringFromSelector(SEL aSelector)`方法，即改`@"contentSize"`为`NSStringFromSelector(@selector(contentSize))`。
+**keyPath**。keyPath的类型是`NSString`，这导致了我们使用了错误的keyPath而不自知，譬如将`@"contentSize"`错误写成`@"contentsize"`，一个更好的方法是不直接使用`@"xxxoo"`，而是积极使用`NSStringFromSelector(SEL aSelector)`方法，即改`@"contentSize"`为`NSStringFromSelector(@selector(contentSize))`。
 
 **context**。对于context，上文已经提到一种场景：假如父类（设为`ClassA`）和子类（设为`ClassB`）都监听了同一个对象肿么办？是`ClassB`处理呢还是交给父类`ClassA`的`observeValueForKeyPath:ofObject:change:context:`处理呢？更复杂一点，如果子类的子类（设为`ClassC`）也监听了同一个对象，当`ClassB`接收到`ClassC`的`[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];`消息时又该如何处理呢？
 
